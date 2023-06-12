@@ -7,9 +7,8 @@ from pytest_django.asserts import assertRedirects, assertFormError
 from news.forms import WARNING
 from news.models import Comment
 
-pytest.mark.django_db
 
-
+@pytest.mark.django_db
 def test_anonymous_user_cant_create_comment(client, news, form_data):
     url = reverse('news:detail', args=news.pk)
     response = client.post(url, data=form_data)

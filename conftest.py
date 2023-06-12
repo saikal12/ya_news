@@ -6,6 +6,7 @@ from news.forms import BAD_WORDS
 from news.models import News, Comment
 from yanews import settings
 
+
 @pytest.fixture
 def news():
     news = News.objects.create(title='Заголовок', text='текст')
