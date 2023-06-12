@@ -4,7 +4,7 @@ from django.urls import reverse
 #from pytest_django.asserts import assert
 
 @pytest.mark.django_db
-def test_paginator_in_home_page(client):
+def test_paginator_in_home_page(client, news_data):
     url = reverse('news:home')
     response = client.get(url)
     object_list = response.context['object_list']
@@ -12,7 +12,7 @@ def test_paginator_in_home_page(client):
     assert news_count == settings.NEWS_COUNT_ON_HOME_PAGE
 
 @pytest.mark.django_db
-def test_news_order(client):
+def test_news_order(client, news_data):
     url = reverse('news:home')
     response = client.get(url)
     object_list = response.context['object_list']
@@ -21,7 +21,7 @@ def test_news_order(client):
     assert all_dates == sorted_dates
 
 @pytest.mark.django_db
-def test_comments_order(client, news):
+def test_comments_order(client, news, comment_for_detail):
     url = reverse('news:detail', args=(news.pk,))
     response = client.get(url)
     assert 'news' in response.context
