@@ -39,11 +39,14 @@ def news_data():
         news = News(title=f'Новость {index}', text='Просто текст.',date=today - timedelta(days=index))
         all_news.append(news)
     News.objects.bulk_create(all_news)
+
+
 @pytest.fixture
 def form_data():
     return {
         'text':'Текст комментария'
     }
+
 
 @pytest.fixture
 def bad_words_data():
