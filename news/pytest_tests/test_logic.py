@@ -4,8 +4,8 @@ import pytest
 from django.urls import reverse
 from pytest_django.asserts import assertRedirects, assertFormError
 
-from ya_news.news.forms import WARNING
-from ya_news.news.models import Comment
+from news.forms import WARNING
+from news.models import Comment
 
 
 @pytest.mark.django_db
@@ -38,31 +38,33 @@ def test_user_cant_use_bad_words(news, author_client, bad_words_data):
     assert Comment.objects.count() == 0
 
 @pytest.mark.django_db
-def test_author_can_delete_comment(news, author_client):
-    url = reverse('news:delete', args=(news.pk,))
+def test_author_can_delete_comment(news, author_client, comment):
+    url = reverse('news:delete', args=(comment.pk,))
     response = author_client.post(url)
-    assertRedirects(response, f'{url}#comments')
+    url_for_comment_block = reverse('news:detail', args=(news.pk,))
+    assertRedirects(response, url_for_comment_block+'#comments')
     assert Comment.objects.count() == 0
 
 @pytest.mark.django_db
-def test_user_cant_delete_comment_of_another_user(admin_clint, news):
-    url = reverse('news:delete', args=(news.pk,))
-    response = admin_clint.post(url)
+def test_user_cant_delete_comment_of_another_user(admin_client, news, comment):
+    url = reverse('news:delete', args=(comment.pk,))
+    response = admin_client.post(url)
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert Comment.objects.count() == 1
 
 @pytest.mark.django_db
 def test_author_can_edit_comment(news, author_client, form_data, comment):
-    url = reverse('news:edit', args=(news.pk,))
+    url = reverse('news:edit', args=(comment.pk,))
     response = author_client.post(url, data=form_data)
-    assertRedirects(response, f'{url}#comments')
+    url_for_comment_block = reverse('news:detail', args=(news.pk,))
+    assertRedirects(response, url_for_comment_block + '#comments')
     comment.refresh_from_db()
     assert comment.text == form_data['text']
 
 @pytest.mark.django_db
-def test_other_user_cant_edit_note(admin_client, form_data, news, comment):
-    url = reverse('news:edit', args=(news.pk,))
+def test_other_user_cant_edit_comment(admin_client, form_data, news, comment):
+    url = reverse('news:edit', args=(comment.pk,))
     response = admin_client.post(url, data=form_data)
     assert response.status_code == HTTPStatus.NOT_FOUND
     comment_fr_db = Comment.objects.get(pk=comment.pk)
-    assert comment['text'] == comment_fr_db
+    assert comment.text == comment_fr_db.text
